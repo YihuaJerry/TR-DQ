@@ -2,6 +2,12 @@
 
 <h5 align="center"> 如果本项目对你有所帮助，欢迎在 GitHub 上点亮 Star ⭐ 支持我们。🙏🙏 </h5>
 
+<p align="center">
+  <a href="https://ojs.aaai.org/index.php/AAAI/article/view/37841"><img src="https://img.shields.io/badge/AAAI%202026-论文-red" alt="AAAI 2026 论文"></a>
+  <a href="https://arxiv.org/abs/2503.06564"><img src="https://img.shields.io/badge/arXiv-2503.06564-b31b1b" alt="arXiv"></a>
+  <a href="README.md"><img src="https://img.shields.io/badge/README-English-blue" alt="English README"></a>
+</p>
+
 ## 最新消息
 
 - **[2025.11.08]** 论文被第四十届 AAAI 人工智能会议（AAAI-26）接收。

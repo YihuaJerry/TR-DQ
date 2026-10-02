@@ -2,6 +2,12 @@
 
 <h5 align="center"> If our project helps you, please give us a star ⭐ on GitHub to support us. 🙏🙏 </h5>
 
+<p align="center">
+  <a href="https://ojs.aaai.org/index.php/AAAI/article/view/37841"><img src="https://img.shields.io/badge/AAAI%202026-Paper-red" alt="AAAI 2026 Paper"></a>
+  <a href="https://arxiv.org/abs/2503.06564"><img src="https://img.shields.io/badge/arXiv-2503.06564-b31b1b" alt="arXiv"></a>
+  <a href="README_zh-CN.md"><img src="https://img.shields.io/badge/README-中文-blue" alt="中文版 README"></a>
+</p>
+
 ## News
 
 - **[2025.11.08]** Our paper was accepted by the Fortieth AAAI Conference on Artificial Intelligence, AAAI-26.
