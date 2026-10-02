@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "trdq"
+version = "1.0.0"
+description = "Official implementation of TR-DQ: Time-Rotation Diffusion Quantization"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+  {name = "Yihua Shao"},
+  {name = "TR-DQ Authors"},
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Science/Research",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+  "torch==2.3.1",
+  "torchvision==0.18.1",
+  "numpy==1.26.4",
+  "omegaconf==2.1.1",
+  "PyYAML==6.0",
+  "tqdm==4.67.1",
+  "einops==0.3.0",
+  "pytorch-lightning==1.4.2",
+  "torchmetrics==0.6.0",
+  "scipy==1.15.2",
+  "Pillow==9.0.1",
+  "packaging==24.2",
+  "matplotlib==3.10.0",
+  "ipdb==0.13.13",
+]
+
+[project.urls]
+Repository = "https://github.com/YihuaJerry/TR-DQ"
+Paper = "https://doi.org/10.1609/aaai.v40i11.37841"
+arXiv = "https://arxiv.org/abs/2503.06564"
+
+[tool.setuptools.packages.find]
+include = ["trdq*", "model*", "utils*"]
+
+[tool.pytest.ini_options]
+testpaths = ["test"]
+addopts = "-q"
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+

@@ -1,0 +1,21 @@
+-r ../requirements.txt
+
+# OpenSora/Wan stack copied from the research environment.
+accelerate==1.4.0
+diffusers==0.35.1
+transformers==4.55.4
+mmengine==0.10.6
+mmcv==1.7.0
+imageio==2.9.0
+imageio-ffmpeg==0.4.2
+opencv-python==4.11.0.86
+ftfy==6.3.1
+sentencepiece==0.1.99
+safetensors==0.5.2
+huggingface-hub>=0.34.0,<1.0
+colossalai==0.4.8
+wandb==0.19.7
+tensorboard==2.19.0
+
+# FlashAttention is optional and must match the local CUDA/PyTorch ABI.
+

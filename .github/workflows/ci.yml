@@ -1,0 +1,24 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+          cache: pip
+      - run: python -m pip install --upgrade pip
+      # CPU-only structural CI; model stacks and CUDA kernels are validated separately.
+      - run: pip install torch==2.3.1 --index-url https://download.pytorch.org/whl/cpu
+      - run: pip install pytest ruff pyyaml numpy==1.26.4 omegaconf==2.1.1
+      - run: pip install -e . --no-deps
+      - run: python -m compileall -q trdq model utils test
+      - run: ruff check trdq/__init__.py utils test
+      - run: pytest
+

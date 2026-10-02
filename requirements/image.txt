@@ -1,0 +1,24 @@
+-r ../requirements.txt
+
+# PixArt stack copied from the research environment.
+accelerate==1.4.0
+diffusers==0.24.0
+transformers==4.32.1
+huggingface-hub==0.25.2
+mmcv==1.7.0
+mmengine==0.10.6
+timm==0.6.12
+sentencepiece==0.1.99
+tensorboard==2.19.0
+tensorboardX==2.6.2.2
+ftfy==6.3.1
+beautifulsoup4==4.13.3
+protobuf==3.20.2
+opencv-python==4.11.0.86
+optimum==1.24.0
+peft==0.13.2
+torch-fidelity==0.3.0
+image-reward==1.5
+xformers==0.0.27
+came-pytorch==0.1.3
+

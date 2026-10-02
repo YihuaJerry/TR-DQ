@@ -1,0 +1,80 @@
+cff-version: 1.2.0
+message: "If you use TR-DQ, please cite the AAAI-26 paper."
+title: "TR-DQ: Time-Rotation Diffusion Quantization"
+type: software
+version: 1.0.0
+date-released: 2026-03-14
+url: "https://arxiv.org/abs/2503.06564"
+authors:
+  - family-names: Shao
+    given-names: Yihua
+  - family-names: Lin
+    given-names: Deyang
+  - family-names: Yan
+    given-names: Minxi
+  - family-names: Chen
+    given-names: Siyu
+  - family-names: Zeng
+    given-names: Fanhu
+  - family-names: Liao
+    given-names: Minwen
+  - family-names: Ma
+    given-names: Ao
+  - family-names: Yan
+    given-names: Ziyang
+  - family-names: Wang
+    given-names: Haozhe
+  - family-names: Wang
+    given-names: Yan
+  - family-names: Chen
+    given-names: Zhi
+  - family-names: Cao
+    given-names: Xiaofeng
+  - family-names: Qin
+    given-names: Haotong
+  - family-names: Tang
+    given-names: Hao
+  - family-names: Guo
+    given-names: Jingcai
+preferred-citation:
+  type: conference-paper
+  title: "TR-DQ: Time-Rotation Diffusion Quantization"
+  authors:
+    - family-names: Shao
+      given-names: Yihua
+    - family-names: Lin
+      given-names: Deyang
+    - family-names: Yan
+      given-names: Minxi
+    - family-names: Chen
+      given-names: Siyu
+    - family-names: Zeng
+      given-names: Fanhu
+    - family-names: Liao
+      given-names: Minwen
+    - family-names: Ma
+      given-names: Ao
+    - family-names: Yan
+      given-names: Ziyang
+    - family-names: Wang
+      given-names: Haozhe
+    - family-names: Wang
+      given-names: Yan
+    - family-names: Chen
+      given-names: Zhi
+    - family-names: Cao
+      given-names: Xiaofeng
+    - family-names: Qin
+      given-names: Haotong
+    - family-names: Tang
+      given-names: Hao
+    - family-names: Guo
+      given-names: Jingcai
+  collection-title: "Proceedings of the AAAI Conference on Artificial Intelligence"
+  volume: 40
+  issue: 11
+  start: 8869
+  end: 8877
+  year: 2026
+  doi: "10.1609/aaai.v40i11.37841"
+

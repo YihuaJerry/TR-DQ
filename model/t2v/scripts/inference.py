@@ -1,0 +1,164 @@
+# Repository-local import bootstrap (keeps the original scripts directly executable).
+from pathlib import Path as _Path
+import sys as _sys
+_SCRIPT_FILE = _Path(__file__).resolve()
+_REPO_ROOT = _SCRIPT_FILE.parents[3]
+_BACKEND_ROOT = _SCRIPT_FILE.parents[1]
+for _local_path in (_REPO_ROOT, _BACKEND_ROOT):
+    if str(_local_path) not in _sys.path:
+        _sys.path.insert(0, str(_local_path))
+import os
+import sys
+# sys.path.append(".")
+
+import torch
+from mmengine.runner import set_random_seed
+from opensora.datasets import save_sample
+from opensora.models.wan import resolve_wan_pretrained_root
+from opensora.registry import MODELS, SCHEDULERS, build_module
+from opensora.utils.config_utils import parse_configs
+from opensora.utils.build_model import build_wan_components
+from opensora.utils.misc import to_torch_dtype
+
+import inspect
+
+def load_prompts(prompt_path):
+    with open(prompt_path, "r") as f:
+        prompts = [line.strip() for line in f.readlines()]
+    return prompts
+
+
+def main():
+    # 1. cfg
+    cfg = parse_configs(training=False)
+    print(cfg)
+
+    # 2. runtime variables
+    torch.set_grad_enabled(False)
+    torch.backends.cuda.matmul.allow_tf32 = True
+    torch.backends.cudnn.allow_tf32 = True
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    dtype = to_torch_dtype(cfg.dtype)
+    set_random_seed(seed=cfg.seed)
+    prompts = load_prompts(cfg.prompt_path)
+
+    if cfg.model.get("model_type", None) == "wan":
+        run_wan_inference(cfg, device, dtype, prompts)
+        return
+
+    # 3. build model & load weights
+    # 3.1. build scheduler
+    scheduler = build_module(cfg.scheduler, SCHEDULERS)
+
+    # 3.2. build model
+    input_size = (cfg.num_frames, *cfg.image_size)
+    vae = build_module(cfg.vae, MODELS)
+    latent_size = vae.get_latent_size(input_size)
+    model = build_module(
+        cfg.model,
+        MODELS,
+        input_size=latent_size,
+        in_channels=vae.out_channels,
+        caption_channels=4096,  # DIRTY: for T5 only
+        model_max_length=cfg.text_encoder.model_max_length,
+        dtype=dtype,
+    )
+    if cfg.get('precompute_text_embeds', None) is not None:
+        text_encoder = None
+    else:  # normal loading of T5 from checkpoint
+        text_encoder = build_module(cfg.text_encoder, MODELS, device=device)  # T5 must be fp32
+        text_encoder.y_embedder = model.y_embedder  # hack for classifier-free guidance
+
+    # 3.3. move to device & eval
+    vae = vae.to(device, dtype).eval()
+    model = model.to(device, dtype).eval()
+
+    # 3.4. support for multi-resolution
+    model_args = dict()
+    if cfg.multi_resolution:
+        image_size = cfg.image_size
+        hw = torch.tensor([image_size], device=device, dtype=dtype).repeat(cfg.batch_size, 1)
+        ar = torch.tensor([[image_size[0] / image_size[1]]], device=device, dtype=dtype).repeat(cfg.batch_size, 1)
+        # Assume model_args is a dictionary that you might need to pass to the model
+        model_args["data_info"] = dict(ar=ar, hw=hw)
+
+    if cfg.get('precompute_text_embeds', None) is not None:
+        model_args['precompute_text_embeds'] = torch.load(cfg.precompute_text_embeds)
+
+    # TEMP: iter through timesteps
+    # for ts in [10,15,20,25,30,40,50,75]:
+        # cfg.scheduler.num_sampling_steps = ts
+        # scheduler = build_module(cfg.scheduler, SCHEDULERS)
+
+
+    # 4. inference
+    model.timestep_wise_quant = False
+    sample_idx = 8
+    save_dir = cfg.save_dir
+    os.makedirs(save_dir, exist_ok=True)
+    # assert len(prompts) % cfg.batch_size == 0, "no specified handling of drop_last, may cause errors"  # no handling of drop last
+    cnt = 0
+    for i in range(27, 28, cfg.batch_size):
+        batch_prompts = prompts[i : i + 1]
+        # duquant
+
+        if cfg.get('precompute_text_embeds',None) is not None:  # also feed in the idxs for saved text_embeds
+            model_args['batch_ids'] = torch.arange(i,i+1)
+        samples = scheduler.sample(
+            model,
+            text_encoder,
+            sampler_type=cfg.sampler,
+            z_size=(vae.out_channels, *latent_size),
+            prompts=batch_prompts,
+            device=device,
+            additional_args=model_args,
+        )
+        samples = vae.decode(samples.to(dtype))
+
+        for idx, sample in enumerate(samples):
+            print(f"Prompt: {batch_prompts[idx]}")
+            # os.makedirs(os.path.join(save_dir,'t_{}/'.format(ts)), exist_ok=True)  # create ts folder
+            save_path = os.path.join(save_dir,f"final_{sample_idx}")
+            save_sample(sample, fps=cfg.fps, save_path=save_path)
+            sample_idx += 1
+
+
+def run_wan_inference(cfg, device, dtype, prompts):
+    try:
+        from diffusers import WanPipeline
+        from diffusers.utils import export_to_video
+    except ImportError as exc:
+        raise ImportError("Wan inference requires recent `diffusers`.") from exc
+
+    _, model, text_encoder, vae, _, _ = build_wan_components(cfg, device, dtype)
+    pipeline_root = resolve_wan_pretrained_root(cfg.pipeline_from_pretrained)
+    pipe = WanPipeline.from_pretrained(
+        pipeline_root,
+        transformer=model.model,
+        vae=vae.model,
+        text_encoder=text_encoder.text_encoder,
+        tokenizer=text_encoder.tokenizer,
+        torch_dtype=dtype,
+    )
+    pipe = pipe.to(device)
+
+    os.makedirs(cfg.save_dir, exist_ok=True)
+    for i in range(0, len(prompts), cfg.batch_size):
+        batch_prompts = prompts[i : i + cfg.batch_size]
+        output = pipe(
+            prompt=batch_prompts,
+            negative_prompt=[""] * len(batch_prompts),
+            num_frames=cfg.num_frames,
+            height=cfg.image_size[0],
+            width=cfg.image_size[1],
+            guidance_scale=cfg.scheduler.get("cfg_scale", 1.0),
+            num_inference_steps=cfg.scheduler.get("num_sampling_steps", cfg.scheduler.get("num_inference_steps", 50)),
+            output_type="np",
+        )
+        for local_idx, video in enumerate(output.frames):
+            save_path = os.path.join(cfg.save_dir, f"final_{i + local_idx}.mp4")
+            export_to_video(video, save_path, fps=cfg.fps)
+
+
+if __name__ == "__main__":
+    main()

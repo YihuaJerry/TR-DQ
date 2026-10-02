@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Environments and editors
+.venv/
+venv/
+.idea/
+.vscode/
+.DS_Store
+._*
+__MACOSX/
+
+# Large or generated artifacts
+data/*
+!data/README.md
+checkpoints/*
+!checkpoints/README.md
+outputs/
+logs/
+wandb/
+calib_data/
+*.ckpt
+*.pth
+*.pt
+*.safetensors
+*.npz
+*.whl
+
+# Local configuration and secrets
+.env
+*.local.yaml
+*.local.yml
+

@@ -1,0 +1,50 @@
+part_fp_list: "./config/opensora/remain_fp.txt"
+model:
+    model_id: "opensora"
+    model_type: 'opensora'  # ['sd','sdxl']
+conditional: True
+cfg_split: True
+# mixed_precision: [4,6,8]
+calib_data:
+    path: "your path of calib data"
+    n_steps: 20    # calib_data_sample_steps = total setps // n_steps duquant
+    batch_size: 4  # used for quant param initialization
+    n_samples: 10  # 将总步骤数除以n_steps来确定校准数据的采样间隔,如果扩散模型总步骤是1000，n_steps=10，则每隔100步采样一次数据
+quant:
+    weight:
+        quantizer:
+            n_bits: 8
+            per_group: 'channel'
+            scale_method: 'min_max'
+            # round_mode: 'learned_hard_sigmoid'
+            round_mode: 'nearest'
+    activation:
+        quantizer:
+            n_bits: 8
+            per_group: 'token'
+            #per_group: False
+            dynamic: True
+            scale_method: 'min_max'
+            round_mode: 'nearest_ste'
+            running_stat: False # when dynamic, running_stat=False
+            sym: False
+            n_spatial_token: 1024  # for 16x512x512
+            n_temporal_token: 16
+            n_prompt: 120
+            smooth_quant:
+                enable: True
+                channel_wise_scale_type: momentum_act_max
+                momentum: 0.5
+#                momentum: 0.5
+                # alpha: [0.11,0.11,0.11,0.11,0.11,0.11,0.11,0.11,0.11,0.11]
+                # timerange: [[0, 99], [100, 199], [200, 299], [300, 399], [400, 499], [500, 599], [600, 699], [700, 799], [800, 899], [900, 1000]]
+            #    alpha: [0.11, 0.11]
+#                timerange: [[0,500],[501,1000]]
+                alpha: [0.11,0.11,0.11,0.11,0.11,0.11,0.11,0.11,0.11,0.11,0.11,0.11,0.11,0.11,0.11,0.11,0.11,0.11,0.11,0.11]
+                timerange: [[0, 49],[50, 99],[100, 149],[150, 199],[200, 249],[250, 299],[300, 349],[350, 399],[400, 449],
+                            [450, 499],[500, 549],[550, 599],[600, 649],[650, 699],[700, 749],[750, 799],[800, 849],[850, 899],[900, 949],[950, 1000]]
+                # alpha: [0.11]
+                # timerange: [[0,1000]]
+    grad_checkpoint: False
+resume_with_w_quantized:
+    path: None
